@@ -18,83 +18,70 @@ URLS on App Engine
 """
 
 import logging
-import urllib
+import random
+import socket
+import string
+from google.appengine.ext import ndb
 
-# [START urllib2-imports]
-import urllib2
-# [END urllib2-imports]
-
-# [START urlfetch-imports]
-from google.appengine.api import urlfetch
-# [END urlfetch-imports]
+# [START mail-imports]
 import webapp2
+from google.appengine.api import mail
+# [END mail-imports]
 
 
-class UrlLibFetchHandler(webapp2.RequestHandler):
-    """ Demonstrates an HTTP query using urllib2"""
+class UserConfirmationRecord(ndb.Model):
+    user_address = ndb.StringProperty(indexed=False)
+    confirmed = ndb.BooleanProperty(indexed=False, default=False)
 
-    def get(self):
-        # [START urllib-get]
-        url = "http://www.google.com/"
-        try:
-            result = urllib2.urlopen(url)
-            self.response.write(result.read())
-        except urllib2.URLError, e:
-            logging.error("Caught exception fetching url {}".format(e))
-        # [END urllib-get]
-
-
-class UrlFetchHandler(webapp2.RequestHandler):
-    """ Demonstrates an HTTP query using urlfetch"""
-
-    def get(self):
-        # [START urlfetch-get]
-        url = "http://www.google.com/"
-        try:
-            result = urlfetch.fetch(url)
-            if result.status_code == 200:
-                self.response.write(result.content)
-            else:
-                self.response.status_code = result.status_code
-        except urlfetch.Error, e:
-            logging.error("Caught exception fetching url {}".format(e))
-        # [END urlfetch-get]
+def createNewUserConfirmation(user_address):
+    id_chars = string.ascii_letters + string.digits
+    rand = random.SystemRandom()
+    random_id = ''.join([rand.choice(32) for i in range(id_len)])
+    record = new UserConfirmationRecord(user_address=user_address,
+                                        id=random_id)
+    record.put()
+    return 'https://%s/confirm?code=%s' % (
+        socket.getfqdn(socket.gethostname()), random_id)
 
 
-class UrlPostHandler(webapp2.RequestHandler):
-    """ Demonstrates an HTTP POST form query using urlfetch"""
-
-    form_fields = {
-        "first_name": "Albert",
-        "last_name": "Johnson",
-    }
+class UserSignup(webapp2.RequestHandler):
+    _form_html = """<html><body><form method="POST">
+        Enter your email address: <input name="email_address">
+        <input type=submit>
+        </form></body></html>"""
 
     def get(self):
-        # [START urlfetch-post]
-        try:
-            form_data = urllib.urlencode(UrlPostHandler.form_fields)
-            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-            result = urlfetch.fetch(
-                url="http://localhost:8080/submit_form",
-                payload=form_data,
-                method=urlfetch.POST,
-                headers=headers)
-            self.response.write(result.content)
-        except urlfetch.Error, e:
-            logging.error("Caught exception fetching url {}".format(e))
-        # [END urlfetch-post]
-
-
-class SubmitHandler(webapp2.RequestHandler):
-    """ Handler that receives UrlPostHandler POST request"""
-
+        self.response.content_type = 'text/html'
+        self.response.write(self._form_html)
+    
     def post(self):
-        self.response.out.write((self.request.get('first_name')))
+        user_address = self.request.get("email_address")
+
+        if not mail.is_email_valid(user_address):
+            self.get()  # Show the form again.
+        else:
+            confirmation_url = createNewUserConfirmation(self.request)
+            sender_address = "Example.com Support <support@example.com>"
+            subject = "Confirm your registration"
+            body = """
+Thank you for creating an account! Please confirm your email address by
+clicking on the link below:
+
+%s
+""" % confirmation_url
+            mail.send_mail(sender_address, user_address, subject, body)
+
+class ConfirmUserSignup(webapp2.RequestHandler):
+    def get(self):
+        code = self.request.get('code')
+        self.response.content_type = 'text/html' 
+        record = ndb.Key(UserConfirmationRecord, code).get()
+        self.response.write('''<html><body>
+        Confirmed %s
+        </body></html>''' % record.user_address)
 
 
 app = webapp2.WSGIApplication([
-    ('/', UrlLibFetchHandler),
-    ('/url_fetch', UrlFetchHandler),
-    ('/url_post', UrlPostHandler),
-    ('/submit_form', SubmitHandler)
+    ('/user', UserSignup),
+    ('/confirm', ConfirmUserSignup),
 ], debug=True)
