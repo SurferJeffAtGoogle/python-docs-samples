@@ -17,10 +17,20 @@ import logging
 import webapp2
 from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 
+
 class LogSenderHandler(InboundMailHandler):
     def receive(self, mail_message):
         logging.info("Received a message from: " + mail_message.sender)
 # [END log_sender_handler]
+# [START bodies]
+        plaintext_bodies = mail_message.bodies('text/plain')
+        html_bodies = mail_message.bodies('text/html')
 
+        for content_type, body in html_bodies:
+            decoded_html = body.decode()
+            # ...
+# [END bodies]
 
+# [START app]
 app = webapp2.WSGIApplication([LogSenderHandler.mapping()], debug=True)
+# [END app]
