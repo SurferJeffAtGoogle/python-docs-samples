@@ -35,7 +35,7 @@ The example.com Team
 # [SEND send_mail]
 
 
-class SendMailPage(webapp2.RequestHandler):
+class SendMailHandler(webapp2.RequestHandler):
     def get(self):
         send_approved_mail('%s@appspot.gserviceaccount.com' %
                            app_identity.get_application_id())
@@ -44,5 +44,5 @@ class SendMailPage(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([
-    ('/send_mail', SendMailPage),
+    ('/send_mail', SendMailHandler),
 ], debug=True)

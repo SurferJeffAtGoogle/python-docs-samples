@@ -1,6 +1,6 @@
 ## App Engine UrlFetch Docs Snippets
 
-This sample application demonstrates different ways to request a URL
+This sample application demonstrates different ways to send and receive email
 on App Engine
 
 

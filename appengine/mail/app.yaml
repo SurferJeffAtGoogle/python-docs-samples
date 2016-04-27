@@ -38,3 +38,5 @@ handlers:
   script: handle_bounced_email.app
   login: admin
 # [END handle_bounced_email]
+- url: /attachment
+  script: attachment.app
