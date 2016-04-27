@@ -2,13 +2,11 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
+# [START bounce_service]
 # [START mail_service]
 inbound_services:
 - mail
 # [END mail_service]
-
-# [START bounce_service]
-inbound_services:
 - mail_bounce
 # [END bounce_service]
 
