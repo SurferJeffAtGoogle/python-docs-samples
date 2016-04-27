@@ -26,8 +26,6 @@ from google.appengine.ext import ndb
 # [START mail-imports]
 import webapp2
 from google.appengine.api import mail
-
-
 # [END mail-imports]
 
 
@@ -65,6 +63,7 @@ class UserSignup(webapp2.RequestHandler):
         <input type=submit>
         </form></body></html>""")
 
+    # [START send-confirm-email]
     def post(self):
         user_address = self.request.get('email_address')
 
@@ -82,6 +81,7 @@ clicking on the link below:
             mail.send_mail(sender_address, user_address, subject, body)
             self.response.content_type = 'text/plain'
             self.response.write('An email has been sent to %s.' % user_address)
+    # [END send-confirm-email]
 
 
 class ConfirmUserSignup(webapp2.RequestHandler):

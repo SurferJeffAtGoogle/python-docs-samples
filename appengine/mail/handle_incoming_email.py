@@ -25,7 +25,7 @@ from google.appengine.api import mail
 class InboundEmailMessageHandler(webapp2.RequestHandler):
     def post(self):
         message = mail.InboundEmailMessage(self.request.body)
-        logging.info('Receieved message from %s', message.sender)
+        logging.info('Received message from %s', message.sender)
 # [END inbound-message-handler]
 
 app = webapp2.WSGIApplication([
