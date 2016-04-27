@@ -2,10 +2,15 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
-# [START inbound_services]
+# [START mail_service]
 inbound_services:
 - mail
-# [END inbound_services]
+# [END mail_service]
+
+# [START bounce_service]
+inbound_services:
+- mail_bounce
+# [END bounce_service]
 
 handlers:
 - url: /user/.+
@@ -30,3 +35,8 @@ handlers:
   script: handle_catchall.app
   login: admin
 # [END handle_all_email]
+# [START handle_bounced_email]
+- url: /_ah/bounce
+  script: handle_bounced_email.app
+  login: admin
+# [END handle_bounced_email]
