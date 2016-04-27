@@ -37,15 +37,15 @@ class UserSignupHandler(webapp2.RequestHandler):
                 'Example.com Support <%s@appspot.gserviceaccount.com>' %
                 app_identity.get_application_id())
             subject = 'Confirm your registration'
-            body = """Thank you for creating an account! Please confirm your email address by
-clicking on the link below:
+            body = """Thank you for creating an account!
+Please confirm your email address by clicking on the link below:
 
 %s
 """ % confirmation_url
             mail.send_mail(sender_address, user_address, subject, body)
+# [END send-confirm-email]
             self.response.content_type = 'text/plain'
             self.response.write('An email has been sent to %s.' % user_address)
-# [END send-confirm-email]
 
     def get(self):
         self.response.content_type = 'text/html'
