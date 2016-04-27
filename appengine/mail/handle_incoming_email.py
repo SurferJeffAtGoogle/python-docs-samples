@@ -29,5 +29,5 @@ class InboundEmailMessageHandler(webapp2.RequestHandler):
 # [END inbound-message-handler]
 
 app = webapp2.WSGIApplication([
-    ('/_ah/mail/<recipient>', InboundEmailMessageHandler),
+    ('/_ah/mail/<recipient:.+>', InboundEmailMessageHandler),
 ], debug=True)
