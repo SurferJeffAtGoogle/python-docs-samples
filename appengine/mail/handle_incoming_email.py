@@ -12,22 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Sample application that demonstrates different ways of fetching
-URLS on App Engine
-"""
-
-# [START inbound-message-handler]
+# [START log_sender_handler]
 import logging
 import webapp2
-from google.appengine.api import mail
+from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
 
-class InboundEmailMessageHandler(webapp2.RequestHandler):
-    def post(self):
-        message = mail.InboundEmailMessage(self.request.body)
-        logging.info('Received message from %s', message.sender)
-# [END inbound-message-handler]
+class LogSenderHandler(InboundMailHandler):
+    def receive(self, mail_message):
+        logging.info("Received a message from: " + mail_message.sender)
+# [END log_sender_handler]
 
-app = webapp2.WSGIApplication([
-    ('/_ah/mail/<recipient:.+>', InboundEmailMessageHandler),
-], debug=True)
+
+app = webapp2.WSGIApplication([LogSenderHandler.mapping()], debug=True)
