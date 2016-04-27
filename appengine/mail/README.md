@@ -1,4 +1,4 @@
-## App Engine UrlFetch Docs Snippets
+## App Engine Email Docs Snippets
 
 This sample application demonstrates different ways to send and receive email
 on App Engine
