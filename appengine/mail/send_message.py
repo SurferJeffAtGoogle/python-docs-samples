@@ -14,15 +14,17 @@
 
 import webapp2
 from google.appengine.api import app_identity
-# [BEGIN send_mail]
+# [BEGIN send_message]
 from google.appengine.api import mail
 
 
 def send_approved_mail(sender_address):
-    mail.send_mail(sender=sender_address,
-                   to="Albert Johnson <Albert.Johnson@example.com>",
-                   subject="Your account has been approved",
-                   body="""Dear Albert:
+    message = mail.EmailMessage(
+        sender=sender_address,
+        subject="Your account has been approved")
+
+    message.to = "Albert Johnson <Albert.Johnson@example.com>"
+    message.body = """Dear Albert:
 
 Your example.com account has been approved.  You can now visit
 http://www.example.com/ and sign in using your Google Account to
@@ -31,18 +33,19 @@ access new features.
 Please let us know if you have any questions.
 
 The example.com Team
-""")
-# [SEND send_mail]
+"""
+    message.send()
+# [SEND send_message]
 
 
-class SendMailPage(webapp2.RequestHandler):
+class SendMessagePage(webapp2.RequestHandler):
     def get(self):
         send_approved_mail('%s@appspot.gserviceaccount.com' %
                            app_identity.get_application_id())
         self.response.content_type = 'text/plain'
-        self.response.write('Sent an email to Albert.')
+        self.response.write('Sent an email message to Albert.')
 
 
 app = webapp2.WSGIApplication([
-    ('/send_mail', SendMailPage),
+    ('/send_message', SendMessagePage),
 ], debug=True)

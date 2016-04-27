@@ -8,6 +8,8 @@ inbound_services:
 handlers:
 - url: /send_mail
   script: send_mail.app
+- url: /send_message
+  script: send_message.app
 - url: /_ah/mail/.+
   script: handle_incoming_email.app
   login: admin
