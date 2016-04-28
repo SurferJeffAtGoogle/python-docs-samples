@@ -16,13 +16,14 @@ import datetime
 import random
 import socket
 import string
-from google.appengine.ext import ndb
-# [START send-confirm-email]
-import webapp2
+
 from google.appengine.api import app_identity
 from google.appengine.api import mail
+from google.appengine.ext import ndb
+import webapp2
 
 
+# [START send-confirm-email]
 class UserSignupHandler(webapp2.RequestHandler):
     """Serves the email address sign up form."""
 
@@ -87,7 +88,8 @@ class ConfirmUserSignupHandler(webapp2.RequestHandler):
         if code:
             record = ndb.Key(UserConfirmationRecord, code).get()
             # 2-hour time limit on confirming.
-            if record and datetime.datetime.now() - record.timestamp < datetime.timedelta(hours=2):
+            elapsed = datetime.datetime.now() - record.timestamp
+            if record and elapsed < datetime.timedelta(hours=2):
                 record.confirmed = True
                 record.put()
                 self.response.content_type = 'text/plain'

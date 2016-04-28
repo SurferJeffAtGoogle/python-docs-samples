@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import webapp2
 from google.appengine.api import app_identity
-# [BEGIN send_message]
 from google.appengine.api import mail
+import webapp2
 
 
 def send_approved_mail(sender_address):
+    # [BEGIN send_message]
     message = mail.EmailMessage(
         sender=sender_address,
         subject="Your account has been approved")
@@ -35,7 +35,7 @@ Please let us know if you have any questions.
 The example.com Team
 """
     message.send()
-# [SEND send_message]
+    # [SEND send_message]
 
 
 class SendMessageHandler(webapp2.RequestHandler):

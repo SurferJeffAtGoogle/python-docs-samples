@@ -14,8 +14,9 @@
 
 # [START log_sender_handler]
 import logging
-import webapp2
+
 from google.appengine.ext.webapp.mail_handlers import InboundMailHandler
+import webapp2
 
 
 class LogSenderHandler(InboundMailHandler):
@@ -30,6 +31,10 @@ class LogSenderHandler(InboundMailHandler):
             decoded_html = body.decode()
             # ...
 # [END bodies]
+            logging.info("Html body of length %d.", len(decoded_html))
+        for content_type, body in plaintext_bodies:
+            plaintext = body.decode()
+            logging.info("Plain text body of length %d.", len(plaintext))
 
 # [START app]
 app = webapp2.WSGIApplication([LogSenderHandler.mapping()], debug=True)

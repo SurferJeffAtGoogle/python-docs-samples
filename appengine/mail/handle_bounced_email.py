@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import webapp2
-# from google.appengine.ext.webapp.mail_handlers import BounceNotification
+
 from google.appengine.ext.webapp.mail_handlers import BounceNotificationHandler
+import webapp2
 
 
 class LogBounceHandler(BounceNotificationHandler):

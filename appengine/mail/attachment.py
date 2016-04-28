@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# [START send_attachment]
-import webapp2
 from google.appengine.api import app_identity
 from google.appengine.api import mail
+import webapp2
 
 
+# [START send_attachment]
 class AttachmentHandler(webapp2.RequestHandler):
     def post(self):
         f = self.request.POST.get('file')
