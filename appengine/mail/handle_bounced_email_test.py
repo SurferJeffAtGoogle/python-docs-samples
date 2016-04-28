@@ -11,14 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import send_message
-import webtest
+from google.appengine.ext.webapp.mail_handlers import BounceNotification
+
+import handle_bounced_email
 
 
-def test_send_message(testbed):
-    testbed.init_mail_stub()
-    testbed.init_app_identity_stub()
-    app = webtest.TestApp(send_message.app)
-    response = app.get('/send_message')
-    assert response.status_int == 200
-    assert 'Sent an email message to Albert.' in response.body
+def test_handle_bounced_email(testbed):
+    handler = handle_bounced_email.LogBounceHandler()
+    handler.request = 'request'
+    bounced_message = BounceNotification({})
+    handler.receive(bounced_message)
