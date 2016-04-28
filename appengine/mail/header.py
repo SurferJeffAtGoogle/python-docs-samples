@@ -40,11 +40,13 @@ class SendMailHandler(webapp2.RequestHandler):
         </form></body></html>""")
 
     def post(self):
+        print repr(self.request.POST)
+        id = self.request.POST['thread_id']
         send_example_mail('%s@appspot.gserviceaccount.com' %
-                          app_identity.get_application_id(),
-                          self.request.get('thread_id'))
+                          app_identity.get_application_id(), id)
         self.response.content_type = 'text/plain'
-        self.response.write('Sent an email to Albert.')
+        self.response.write(
+            'Sent an email to Albert with Reference header set to %s.' % id)
 
 
 app = webapp2.WSGIApplication([
