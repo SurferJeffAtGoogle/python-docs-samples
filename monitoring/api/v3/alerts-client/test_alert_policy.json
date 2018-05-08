@@ -1,0 +1,33 @@
+{
+    "name": "projects/surferjeff-test2/alertPolicies/1324272927636537722",
+    "displayName": "AlertTest.cs",
+    "combiner": "OR",
+    "conditions": [
+        {
+            "conditionThreshold": {
+                "filter": "metric.label.state=\"blocked\" AND metric.type=\"agent.googleapis.com/processes/count_by_state\"  AND resource.type=\"gce_instance\"",
+                "comparison": "COMPARISON_GT",
+                "thresholdValue": 100,
+                "duration": "900s",
+                "trigger": {
+                    "percent": 0
+                },
+                "aggregations": [
+                    {
+                        "alignmentPeriod": "60s",
+                        "perSeriesAligner": "ALIGN_MEAN",
+                        "crossSeriesReducer": "REDUCE_MEAN",
+                        "groupByFields": [
+                            "project",
+                            "resource.label.instance_id",
+                            "resource.label.zone"
+                        ]
+                    }
+                ]
+            },
+            "displayName": "AlertTest.cs",
+            "name": "projects/surferjeff-test2/alertPolicies/1324272927636537722/conditions/1324272927636538727"
+        }
+    ],
+    "enabled": false
+}

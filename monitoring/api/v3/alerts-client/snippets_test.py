@@ -20,46 +20,13 @@ from google.cloud import monitoring_v3
 import google.protobuf.json_format
 
 class PochanFixture:
-    alert_policy_json = r'''
-{
-    "displayName": "AlertTest.cs",
-    "combiner": "OR",
-    "conditions": [
-        {
-            "conditionThreshold": {
-                "filter": "metric.label.state=\"blocked\" AND metric.type=\"agent.googleapis.com/processes/count_by_state\"  AND resource.type=\"gce_instance\"",
-                "comparison": "COMPARISON_GT",
-                "thresholdValue": 100,
-                "duration": "900s",
-                "trigger": {
-                    "percent": 0
-                },
-                "aggregations": [
-                    {
-                        "alignmentPeriod": "60s",
-                        "perSeriesAligner": "ALIGN_MEAN",
-                        "crossSeriesReducer": "REDUCE_MEAN",
-                        "groupByFields": [
-                            "project",
-                            "resource.label.instance_id",
-                            "resource.label.zone"
-                        ]
-                    }
-                ]
-            },
-            "displayName": "AlertTest.cs"
-        }
-    ],
-    "enabled": false
-}
-'''
-
     def __init__(self):
         self.project = snippets.project()
         self.alert_policy_client = monitoring_v3.AlertPolicyServiceClient()
         self.notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
         self.policy = monitoring_v3.types.alert_pb2.AlertPolicy
-        google.protobuf.json_format.Parse(self.alert_policy_json, self.policy)
+        json = open('test_alert_policy.json').read()
+        google.protobuf.json_format.Parse(json, self.policy)
 
 
 @pytest.fixture()
