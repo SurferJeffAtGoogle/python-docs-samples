@@ -15,55 +15,26 @@
 from gcp_devrel.testing import eventually_consistent
 
 import snippets
+import pytest
+from google.cloud import monitoring_v3
 
+class PochanFixture:
+    def __init__(self):
+        self.project = snippets.project()
+        self.alert_policy_client = monitoring_v3.AlertPolicyServiceClient()
+        self.notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
+        self.policy = monitoring_v3.types.alert_pb2.AlertPolicy()
+        self.policy.display_name = "snippets_test.py"
+        self.policy.enabled.value = False
+        self.policy.combiner = monitoring_v3.enums.AlertPolicy.ConditionCombinerType.OR        
+        condition = self.policy.conditions.add()
+        condition.condition_threshold.filter = "metric.label.state=\"blocked\" AND metric.type=\"agent.googleapis.com/processes/count_by_state\"  AND resource.type=\"gce_instance\""
+        aggregation = condition.threshold.aggregations.add()
+        
 
-def test_create_get_delete_metric_descriptor(capsys):
-    snippets.create_metric_descriptor()
+@pytest.fixture()
+def pochan():
+    yield PochanFixture()
 
-    @eventually_consistent.call
-    def __():
-        snippets.get_metric_descriptor('custom.googleapis.com/my_metric')
-
-    out, _ = capsys.readouterr()
-    assert 'DOUBLE' in out
-    snippets.delete_metric_descriptor('custom.googleapis.com/my_metric')
-    out, _ = capsys.readouterr()
-    assert 'Deleted metric' in out
-
-
-def test_list_metric_descriptors(capsys):
-    snippets.list_metric_descriptors()
-    out, _ = capsys.readouterr()
-    assert 'logging.googleapis.com/byte_count' in out
-
-
-def test_list_resources(capsys):
-    snippets.list_monitored_resources()
-    out, _ = capsys.readouterr()
-    assert 'pubsub_topic' in out
-
-
-def test_get_resources(capsys):
-    snippets.get_monitored_resource_descriptor('pubsub_topic')
-    out, _ = capsys.readouterr()
-    assert 'A topic in Google Cloud Pub/Sub' in out
-
-
-def test_time_series(capsys):
-    snippets.write_time_series()
-
-    snippets.list_time_series()
-    out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
-
-    snippets.list_time_series_header()
-    out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
-
-    snippets.list_time_series_aggregate()
-    out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
-
-    snippets.list_time_series_reduce()
-    out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
+def test_create_get_delete_metric_descriptor(capsys, pochan):
+    snippets.list_alert_policies(snippets.project())
