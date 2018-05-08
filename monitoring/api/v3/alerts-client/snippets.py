@@ -13,18 +13,29 @@
 # limitations under the License.
 
 import argparse
+import os
 import pprint
 
 from google.cloud import monitoring_v3
 
 def list_alert_policies():
     client = monitoring_v3.AlertPolicyServiceClient()
-    policies = client.list_alert_policies('projects/surferjeff-test2')
+    policies = client.list_alert_policies(project())
     for policy in policies:
-        pprint.pprint(policy)
+        print(policy.display_name or policy.name)
 
+class MissingProjectIdError(Exception):
+    pass
+
+def project():
+    project_id = os.environ['GCLOUD_PROJECT']
+    if not project_id:
+        raise MissingProjectIdError('Set the environment variable ' +
+            'GCLOUD_PROJECT to your Google Cloud Project Id.')
+    return 'projects/' + project_id
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser(
         description='Demonstrates AlertPolicy API operations.')
 
