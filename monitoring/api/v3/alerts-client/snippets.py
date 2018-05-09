@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import os
-import pprint
-from tabulate import tabulate
-import typing
-
 from google.cloud import monitoring_v3
+from tabulate import tabulate
+import argparse
+import google.protobuf.json_format
+import json
+import os
+import typing
 
 
 def list_alert_policies(project_name: str):
@@ -66,6 +66,14 @@ def replace_notification_channels(project_name: str, alert_policy_id: str,
     print('Updated', updated_policy.name)    
 
 
+def backup(project_name: str):
+    alert_client = monitoring_v3.AlertPolicyServiceClient()
+    channel_client = monitoring_v3.NotificationChannelServiceClient()
+    record = backup_record(project_name, alert_client.list_alert_policies(project_name),
+        channel_client.list_notification_channels(project_name))
+    json.dump(record, open('backup.json', 'wt'), cls=ProtoEncoder, indent=2)
+    
+
 class MissingProjectIdError(Exception):
     pass
 
@@ -88,6 +96,21 @@ def project_id():
 
 def project_name():
     return 'projects/' + project_id()
+
+def backup_record(project_name: str = None, 
+    policies: typing.Sequence[monitoring_v3.types.alert_pb2.AlertPolicy] = None,
+    channels: typing.Sequence[monitoring_v3.types.notification_pb2.NotificationChannel] = None):
+    return {'project_name': project_name,
+            'policies': list(policies) or [],
+            'channels': list(channels) or []}
+
+class ProtoEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if type(obj) in (monitoring_v3.types.alert_pb2.AlertPolicy,
+            monitoring_v3.types.notification_pb2.NotificationChannel):
+            text = google.protobuf.json_format.MessageToJson(obj) 
+            return json.loads(text)
+        return super(ProtoEncoder, self).default(obj)
 
 
 if __name__ == '__main__':
@@ -137,12 +160,17 @@ if __name__ == '__main__':
         action='append'
     )
 
+    backup_parser = subparsers.add_parser(
+        'backup',
+        help=backup.__doc__
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-alert-policies':
         list_alert_policies(project_name())
 
-    if args.command == 'list-notification-channels':
+    elif args.command == 'list-notification-channels':
         list_notification_channels(project_name())
 
     elif args.command == 'enable-alert-policies':
@@ -154,4 +182,7 @@ if __name__ == '__main__':
     elif args.command == 'replace-notification-channels':
         replace_notification_channels(project_name(), args.alert_policy_id, 
             args.notification_channel_id)
+
+    elif args.command == 'backup':
+        backup(project_name())
     
