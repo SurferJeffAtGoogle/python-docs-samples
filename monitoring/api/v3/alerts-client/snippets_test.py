@@ -98,3 +98,14 @@ def test_replace_channels(capsys, pochan: PochanFixture):
         [notification_channel_id])
     out, _ = capsys.readouterr()
     assert "Updated {0}".format(pochan.alert_policy.name) in out
+
+
+def test_backup_and_restore(capsys, pochan: PochanFixture):
+    snippets.backup(pochan.project_name)
+    out, _ = capsys.readouterr()
+ 
+    snippets.restore(pochan.project_name)
+    out, _ = capsys.readouterr()
+    assert "Updated {0}".format(pochan.alert_policy.name) in out
+    assert "Updating channel {0}".format(pochan.notification_channel.display_name) in out
+

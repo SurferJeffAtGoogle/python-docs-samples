@@ -73,9 +73,11 @@ def backup(project_name: str):
               'policies': list(alert_client.list_alert_policies(project_name)),
               'channels': list(channel_client.list_notification_channels(project_name))}
     json.dump(record, open('backup.json', 'wt'), cls=ProtoEncoder, indent=2)
+    print('Backed up alert policies and notification channels to backup.json.')
     
 
 def restore(project_name: str):
+    print('Loading alert policies and notification channels from backup.json.')
     record = json.load(open('backup.json', 'rt'))
     is_same_project = project_name == record['project_name']
     # Convert dicts to AlertPolicies.
