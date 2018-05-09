@@ -57,9 +57,9 @@ class PochanFixture:
 
     def __exit__(self, type, value, traceback):
         # Delete the policy and channel we created.
+        self.alert_policy_client.delete_alert_policy(self.alert_policy.name)
         self.notification_channel_client.delete_notification_channel(
             self.notification_channel.name)
-        self.alert_policy_client.delete_alert_policy(self.alert_policy.name)
 
 
 @pytest.fixture(scope='session')
@@ -89,3 +89,12 @@ def test_enable_alert_policies(capsys, pochan: PochanFixture):
     snippets.enable_alert_policies(pochan.project_name, True)
     out, _ = capsys.readouterr()
     assert "already enabled" in out
+
+
+def test_replace_channels(capsys, pochan: PochanFixture):
+    alert_policy_id = pochan.alert_policy.name.split('/')[-1]
+    notification_channel_id = pochan.notification_channel.name.split('/')[-1]
+    snippets.replace_notification_channels(pochan.project_name, alert_policy_id,
+        [notification_channel_id])
+    out, _ = capsys.readouterr()
+    assert "Updated {0}".format(pochan.alert_policy.name) in out

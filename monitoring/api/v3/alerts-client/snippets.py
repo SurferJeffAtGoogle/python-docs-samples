@@ -15,6 +15,7 @@
 import argparse
 import os
 import pprint
+import typing
 
 from google.cloud import monitoring_v3
 
@@ -41,8 +42,25 @@ def enable_alert_policies(project_name: str, enable, filter_: str = None):
             print('Enabled' if enable else 'Disabled', policy.name)
 
 
+def replace_notification_channels(project_name: str, alert_policy_id: str,
+    channel_ids: typing.Sequence[str]):
+    _, project_id = project_name.split('/')
+    alert_client = monitoring_v3.AlertPolicyServiceClient()
+    channel_client = monitoring_v3.NotificationChannelServiceClient()
+    policy = monitoring_v3.types.alert_pb2.AlertPolicy()
+    policy.name = alert_client.alert_policy_path(project_id, alert_policy_id)
+    for channel_id in channel_ids:
+        policy.notification_channels.append(
+            channel_client.notification_channel_path(project_id, channel_id))
+    mask = monitoring_v3.types.field_mask_pb2.FieldMask()
+    mask.paths.append('notification_channels')
+    updated_policy = alert_client.update_alert_policy(policy, mask)
+    print('Updated', updated_policy.name)    
+
+
 class MissingProjectIdError(Exception):
     pass
+
 
 def project_id():
     """Retreieves the project id from the environment variable.
