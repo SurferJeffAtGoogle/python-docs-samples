@@ -44,8 +44,8 @@ def enable_alert_policies(project_name: str, enable, filter_: str = None):
 class MissingProjectIdError(Exception):
     pass
 
-def project():
-    """Retreieves the project name from the environment variable.
+def project_id():
+    """Retreieves the project id from the environment variable.
     
     Raises:
         MissingProjectIdError -- When not set.
@@ -57,7 +57,12 @@ def project():
     if not project_id:
         raise MissingProjectIdError('Set the environment variable ' +
             'GCLOUD_PROJECT to your Google Cloud Project Id.')
-    return 'projects/' + project_id
+    return project_id
+
+
+def project_name():
+    return 'projects/' + project_id()
+
 
 if __name__ == '__main__':
 
@@ -90,10 +95,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'list-alert-policies':
-        list_alert_policies(project())
+        list_alert_policies(project_name())
 
     if args.command == 'enable-alert-policies':
-        enable_alert_policies(project(), enable=True, filter_=args.filter)
+        enable_alert_policies(project_name(), enable=True, filter_=args.filter)
 
     if args.command == 'disable-alert-policies':
-        enable_alert_policies(project(), enable=False, filter_=args.filter)
+        enable_alert_policies(project_name(), enable=False, filter_=args.filter)
