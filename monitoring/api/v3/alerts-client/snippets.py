@@ -114,6 +114,34 @@ def restore(project_name: str):
 
     # Restore the alerts
     alert_client = monitoring_v3.AlertPolicyServiceClient()
+    for policy in policies:
+        print('Updating policy', policy.display_name)
+        # These two fields cannot be set directly, so clear them.
+        policy.ClearField('creation_record')
+        policy.ClearField('mutation_record')
+        # Update old channel names with new channel names.
+        for i, channel in enumerate(policy.notification_channels):
+            new_channel = channel_name_map.get(channel)
+            if new_channel:
+                policy.notification_channels[i] = new_channel
+        updated = False
+        if is_same_project:
+            try:
+                alert_client.update_alert_policy(policy)
+                updated = True
+            except google.api_core.exceptions.NotFound:
+                pass
+            except google.api_core.exceptions.InvalidArgument:
+                pass
+        if not updated:
+            # The policy no longer exists.  Recreate it.
+            old_name = policy.name
+            policy.ClearField("name")
+            for condition in policy.conditions:
+                condition.ClearField("name")
+            policy = alert_client.create_alert_policy(project_name, policy)
+        print('Updated', policy.name)            
+
 
 
 class MissingProjectIdError(Exception):
