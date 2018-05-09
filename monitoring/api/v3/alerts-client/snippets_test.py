@@ -62,7 +62,7 @@ class PochanFixture:
         self.alert_policy_client.delete_alert_policy(self.alert_policy.name)
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def pochan():
     with PochanFixture() as pochan:
         yield pochan
@@ -73,3 +73,19 @@ def test_list_alert_policies(capsys, pochan: PochanFixture):
     out, _ = capsys.readouterr()
     assert pochan.alert_policy.display_name in out
     
+
+def test_enable_alert_policies(capsys, pochan: PochanFixture):
+    snippets.enable_alert_policies(pochan.project_name, False)
+    out, _ = capsys.readouterr()
+
+    snippets.enable_alert_policies(pochan.project_name, False)
+    out, _ = capsys.readouterr()
+    assert "already disabled" in out
+
+    snippets.enable_alert_policies(pochan.project_name, True)
+    out, _ = capsys.readouterr()
+    assert "Enabled {0}".format(pochan.project_name) in out
+
+    snippets.enable_alert_policies(pochan.project_name, True)
+    out, _ = capsys.readouterr()
+    assert "already enabled" in out
