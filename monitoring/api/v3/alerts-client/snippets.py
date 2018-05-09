@@ -73,8 +73,8 @@ def backup(project_name: str):
               'policies': list(alert_client.list_alert_policies(project_name)),
               'channels': list(channel_client.list_notification_channels(project_name))}
     json.dump(record, open('backup.json', 'wt'), cls=ProtoEncoder, indent=2)
-    restore(project_name)
     
+
 def restore(project_name: str):
     record = json.load(open('backup.json', 'rt'))
     # Convert dicts to AlertPolicies.
@@ -172,6 +172,11 @@ if __name__ == '__main__':
         help=backup.__doc__
     )
 
+    restore_parser = subparsers.add_parser(
+        'restore',
+        help=restore.__doc__
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-alert-policies':
@@ -193,3 +198,5 @@ if __name__ == '__main__':
     elif args.command == 'backup':
         backup(project_name())
     
+    elif args.command == 'restore':
+        restore(project_name())
