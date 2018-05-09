@@ -69,8 +69,9 @@ def replace_notification_channels(project_name: str, alert_policy_id: str,
 def backup(project_name: str):
     alert_client = monitoring_v3.AlertPolicyServiceClient()
     channel_client = monitoring_v3.NotificationChannelServiceClient()
-    record = backup_record(project_name, alert_client.list_alert_policies(project_name),
-        channel_client.list_notification_channels(project_name))
+    record = {'project_name': project_name,
+              'policies': list(alert_client.list_alert_policies(project_name)),
+              'channels': list(channel_client.list_notification_channels(project_name))}
     json.dump(record, open('backup.json', 'wt'), cls=ProtoEncoder, indent=2)
     
 
@@ -96,13 +97,6 @@ def project_id():
 
 def project_name():
     return 'projects/' + project_id()
-
-def backup_record(project_name: str = None, 
-    policies: typing.Sequence[monitoring_v3.types.alert_pb2.AlertPolicy] = None,
-    channels: typing.Sequence[monitoring_v3.types.notification_pb2.NotificationChannel] = None):
-    return {'project_name': project_name,
-            'policies': list(policies) or [],
-            'channels': list(channels) or []}
 
 class ProtoEncoder(json.JSONEncoder):
     def default(self, obj):
