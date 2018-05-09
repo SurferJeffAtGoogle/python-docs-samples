@@ -25,13 +25,17 @@ class PochanFixture:
         self.alert_policy_client = monitoring_v3.AlertPolicyServiceClient()
         self.notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
         self.policy = monitoring_v3.types.alert_pb2.AlertPolicy()
-        json = open('test_alert_policy.json').read()
-        google.protobuf.json_format.Parse(json, self.policy)
+        alert_policy_json = open('test_alert_policy.json').read()
+        google.protobuf.json_format.Parse(alert_policy_json, self.policy)
+        self.notification_channel = monitoring_v3.types.notification_pb2.NotificationChannel()
+        notification_channel_json = open('test_notification_channel.json').read()
+        google.protobuf.json_format.Parse(notification_channel_json, self.notification_channel)        
 
 
 @pytest.fixture()
 def pochan():
     yield PochanFixture()
+
 
 def test_create_get_delete_metric_descriptor(capsys, pochan):
     snippets.list_alert_policies(snippets.project())

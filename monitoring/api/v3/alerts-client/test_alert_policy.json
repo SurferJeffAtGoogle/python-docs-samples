@@ -1,5 +1,5 @@
 {
-    "displayName": "AlertTest.cs",
+    "displayName": "test_alert_policy.json",
     "combiner": "OR",
     "conditions": [
         {
@@ -24,7 +24,7 @@
                     }
                 ]
             },
-            "displayName": "AlertTest.cs"
+            "displayName": "test_alert_policy.json"
         }
     ],
     "enabled": false
