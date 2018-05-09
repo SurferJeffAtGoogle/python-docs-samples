@@ -15,6 +15,7 @@
 import argparse
 import os
 import pprint
+from tabulate import tabulate
 import typing
 
 from google.cloud import monitoring_v3
@@ -23,8 +24,15 @@ from google.cloud import monitoring_v3
 def list_alert_policies(project_name: str):
     client = monitoring_v3.AlertPolicyServiceClient()
     policies = client.list_alert_policies(project_name)
-    for policy in policies:
-        print(policy.display_name or policy.name)
+    print(tabulate([(policy.name, policy.display_name) for policy in policies],
+        ('name', 'display_name')))
+
+
+def list_notification_channels(project_name: str):
+    client = monitoring_v3.NotificationChannelServiceClient()
+    channels = client.list_notification_channels(project_name)
+    print(tabulate([(channel.name, channel.display_name) for channel in channels],
+        ('name', 'display_name')))
 
 
 def enable_alert_policies(project_name: str, enable, filter_: str = None):
@@ -94,6 +102,11 @@ if __name__ == '__main__':
         help=list_alert_policies.__doc__
     )
 
+    list_notification_channels_parser = subparsers.add_parser(
+        'list-notification-channels',
+        help=list_alert_policies.__doc__
+    )
+
     enable_alert_policies_parser = subparsers.add_parser(
         'enable-alert-policies',
         help=enable_alert_policies.__doc__
@@ -110,13 +123,35 @@ if __name__ == '__main__':
         '--filter',
     )
 
+    replace_notification_channels_parser = subparsers.add_parser(
+        'replace-notification-channels',
+        help=replace_notification_channels.__doc__
+    )
+    replace_notification_channels_parser.add_argument(
+        '-p', '--alert_policy_id',
+        required=True 
+    )
+    replace_notification_channels_parser.add_argument(
+        '-c', '--notification_channel_id',
+        required=True,
+        action='append'
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-alert-policies':
         list_alert_policies(project_name())
 
-    if args.command == 'enable-alert-policies':
+    if args.command == 'list-notification-channels':
+        list_notification_channels(project_name())
+
+    elif args.command == 'enable-alert-policies':
         enable_alert_policies(project_name(), enable=True, filter_=args.filter)
 
-    if args.command == 'disable-alert-policies':
+    elif args.command == 'disable-alert-policies':
         enable_alert_policies(project_name(), enable=False, filter_=args.filter)
+
+    elif args.command == 'replace-notification-channels':
+        replace_notification_channels(project_name(), args.alert_policy_id, 
+            args.notification_channel_id)
+    
