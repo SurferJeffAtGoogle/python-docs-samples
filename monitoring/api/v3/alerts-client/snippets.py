@@ -77,6 +77,7 @@ def backup(project_name: str):
 
 def restore(project_name: str):
     record = json.load(open('backup.json', 'rt'))
+    is_same_project = project_name == record['project_name']
     # Convert dicts to AlertPolicies.
     policies_json = [json.dumps(policy) for policy in record['policies']]
     policies = [google.protobuf.json_format.Parse(
@@ -87,6 +88,33 @@ def restore(project_name: str):
     channels = [google.protobuf.json_format.Parse(
         channel_json, monitoring_v3.types.notification_pb2.NotificationChannel())
         for channel_json in channels_json]
+
+    # Restore the channels.
+    channel_client = monitoring_v3.NotificationChannelServiceClient()
+    channel_name_map = {}
+    for channel in channels:
+        updated = False
+        print('Updating channel', channel.display_name)
+        # This field is immutable and it is illegal to specify a
+        # non-default value (UNVERIFIED or VERIFIED) in the
+        # Create() or Update() operations.
+        channel.verification_status = monitoring_v3.enums.NotificationChannel.VerificationStatus.VERIFICATION_STATUS_UNSPECIFIED
+        if is_same_project:
+            try:
+                channel_client.update_notification_channel(channel)
+                updated = True
+            except google.api_core.exceptions.NotFound:
+                pass
+        if not updated:
+            # The channel no longer exists.  Recreate it.
+            old_name = channel.name
+            channel.ClearField("name")
+            new_channel = channel_client.create_notification_channel(project_name, channel)
+            channel_name_map[old_name] = new_channel.name
+
+    # Restore the alerts
+    alert_client = monitoring_v3.AlertPolicyServiceClient()
+
 
 class MissingProjectIdError(Exception):
     pass
