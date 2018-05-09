@@ -1,5 +1,4 @@
 {
-    "name": "projects/surferjeff-test2/alertPolicies/1324272927636537722",
     "displayName": "AlertTest.cs",
     "combiner": "OR",
     "conditions": [
@@ -25,8 +24,7 @@
                     }
                 ]
             },
-            "displayName": "AlertTest.cs",
-            "name": "projects/surferjeff-test2/alertPolicies/1324272927636537722/conditions/1324272927636538727"
+            "displayName": "AlertTest.cs"
         }
     ],
     "enabled": false

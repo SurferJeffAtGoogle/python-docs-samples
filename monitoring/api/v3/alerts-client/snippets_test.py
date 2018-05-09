@@ -24,7 +24,7 @@ class PochanFixture:
         self.project = snippets.project()
         self.alert_policy_client = monitoring_v3.AlertPolicyServiceClient()
         self.notification_channel_client = monitoring_v3.NotificationChannelServiceClient()
-        self.policy = monitoring_v3.types.alert_pb2.AlertPolicy
+        self.policy = monitoring_v3.types.alert_pb2.AlertPolicy()
         json = open('test_alert_policy.json').read()
         google.protobuf.json_format.Parse(json, self.policy)
 
