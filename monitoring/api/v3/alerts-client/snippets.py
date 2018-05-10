@@ -28,13 +28,16 @@ def list_alert_policies(project_name: str):
         ('name', 'display_name')))
 
 
+# [START monitoring_alert_list_channels]
 def list_notification_channels(project_name: str):
     client = monitoring_v3.NotificationChannelServiceClient()
     channels = client.list_notification_channels(project_name)
     print(tabulate([(channel.name, channel.display_name) for channel in channels],
         ('name', 'display_name')))
+# [END monitoring_alert_list_channels]
 
 
+# [START monitoring_alert_enable_policies]
 def enable_alert_policies(project_name: str, enable, filter_: str = None):
     client = monitoring_v3.AlertPolicyServiceClient()
     policies = client.list_alert_policies(project_name, filter_=filter_)
@@ -48,8 +51,9 @@ def enable_alert_policies(project_name: str, enable, filter_: str = None):
             mask.paths.append('enabled')
             client.update_alert_policy(policy, mask)
             print('Enabled' if enable else 'Disabled', policy.name)
+# [END monitoring_alert_enable_policies]
 
-
+# [START monitoring_alert_replace_channels]
 def replace_notification_channels(project_name: str, alert_policy_id: str,
     channel_ids: typing.Sequence[str]):
     _, project_id = project_name.split('/')
@@ -63,9 +67,11 @@ def replace_notification_channels(project_name: str, alert_policy_id: str,
     mask = monitoring_v3.types.field_mask_pb2.FieldMask()
     mask.paths.append('notification_channels')
     updated_policy = alert_client.update_alert_policy(policy, mask)
-    print('Updated', updated_policy.name)    
+    print('Updated', updated_policy.name)
+# [END monitoring_alert_replace_channels]
 
 
+# [START monitoring_alert_backup_policies]
 def backup(project_name: str):
     alert_client = monitoring_v3.AlertPolicyServiceClient()
     channel_client = monitoring_v3.NotificationChannelServiceClient()
@@ -74,8 +80,20 @@ def backup(project_name: str):
               'channels': list(channel_client.list_notification_channels(project_name))}
     json.dump(record, open('backup.json', 'wt'), cls=ProtoEncoder, indent=2)
     print('Backed up alert policies and notification channels to backup.json.')
+
+
+class ProtoEncoder(json.JSONEncoder):
+    """Uses google.protobuf.json_format to encode protobufs as json."""
+    def default(self, obj):
+        if type(obj) in (monitoring_v3.types.alert_pb2.AlertPolicy,
+            monitoring_v3.types.notification_pb2.NotificationChannel):
+            text = google.protobuf.json_format.MessageToJson(obj) 
+            return json.loads(text)
+        return super(ProtoEncoder, self).default(obj)
+# [END monitoring_alert_backup_policies]
     
 
+# [START monitoring_alert_restore_policies]
 def restore(project_name: str):
     print('Loading alert policies and notification channels from backup.json.')
     record = json.load(open('backup.json', 'rt'))
@@ -143,7 +161,7 @@ def restore(project_name: str):
                 condition.ClearField("name")
             policy = alert_client.create_alert_policy(project_name, policy)
         print('Updated', policy.name)            
-
+# [END monitoring_alert_restore_policies]
 
 
 class MissingProjectIdError(Exception):
@@ -168,14 +186,6 @@ def project_id():
 
 def project_name():
     return 'projects/' + project_id()
-
-class ProtoEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if type(obj) in (monitoring_v3.types.alert_pb2.AlertPolicy,
-            monitoring_v3.types.notification_pb2.NotificationChannel):
-            text = google.protobuf.json_format.MessageToJson(obj) 
-            return json.loads(text)
-        return super(ProtoEncoder, self).default(obj)
 
 
 if __name__ == '__main__':
