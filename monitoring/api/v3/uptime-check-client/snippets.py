@@ -56,10 +56,17 @@ def list_uptime_check_ips(project_name):
         ('region', 'location', 'ip_address')
     ))
 
+
 def get_uptime_check_config(config_name):
     client = monitoring_v3.UptimeCheckServiceClient()
     config = client.get_uptime_check_config(config_name)
     pprint.pprint(config)
+
+
+def delete_uptime_check_config(config_name):
+    client = monitoring_v3.UptimeCheckServiceClient()
+    client.delete_uptime_check_config(config_name)
+    print('Deleted ', config_name)
 
 
 class MissingProjectIdError(Exception):
@@ -127,6 +134,15 @@ if __name__ == '__main__':
         required=True,
     )
 
+    delete_uptime_check_config_parser = subparsers.add_parser(
+        'delete-uptime-check-config',
+        help=delete_uptime_check_config.__doc__
+    )
+    delete_uptime_check_config_parser.add_argument(
+        '-m', '--name',
+        required=True,
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-uptime-check-configs':
@@ -141,3 +157,6 @@ if __name__ == '__main__':
 
     elif args.command == 'get-uptime-check-config':
         get_uptime_check_config(args.name)
+
+    elif args.command == 'delete-uptime-check-config':
+        delete_uptime_check_config(args.name)
