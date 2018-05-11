@@ -21,13 +21,30 @@ import os
 from google.cloud import monitoring_v3
 import google.protobuf.json_format
 import tabulate
+import pprint
+
+
+def create_uptime_check_config(project_name, display_name=None):
+    config = monitoring_v3.types.uptime_pb2.UptimeCheckConfig()
+    config.display_name = display_name or 'New uptime check'
+    config.monitored_resource.type = 'uptime_url'
+    config.monitored_resource.labels.update(
+        {'host': "surferjeff-test2.appspot.com"})
+    config.http_check.path = '/'
+    config.http_check.port = 80
+    config.timeout.seconds = 10
+    config.period.seconds = 300
+
+    client = monitoring_v3.UptimeCheckServiceClient()
+    new_config = client.create_uptime_check_config(project_name, config)
+    pprint.pprint(new_config)    
 
 
 def list_uptime_check_configs(project_name):
     client = monitoring_v3.UptimeCheckServiceClient()
     configs = client.list_uptime_check_configs(project_name)
     for config in configs:
-        config = monitoring_v3.types.uptime_pb2.UptimeCheckConfig()
+        pprint.pprint(config)
         
 
 
@@ -294,6 +311,16 @@ if __name__ == '__main__':
         help=list_alert_policies.__doc__
     )
 
+    create_uptime_check_config_parser = subparsers.add_parser(
+        'create-uptime-check',
+        help=list_alert_policies.__doc__
+    )
+
+    create_uptime_check_config_parser.add_argument(
+        '-d', '--display_name',
+        required=False,
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-alert-policies':
@@ -321,3 +348,6 @@ if __name__ == '__main__':
 
     elif args.command == 'list-uptime-checks':
         list_uptime_check_configs(project_name())
+
+    elif args.command == 'create-uptime-check':
+        create_uptime_check_config(project_name(), args.display_name)
