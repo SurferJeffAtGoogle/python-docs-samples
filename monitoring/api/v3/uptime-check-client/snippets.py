@@ -48,7 +48,7 @@ def list_uptime_check_configs(project_name):
         pprint.pprint(config)        
 
 
-def list_uptime_check_ips(project_name):
+def list_uptime_check_ips():
     client = monitoring_v3.UptimeCheckServiceClient()
     ips = client.list_uptime_check_ips()
     print(tabulate.tabulate(
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         list_uptime_check_configs(project_name())
 
     elif args.command == 'list-uptime-check-ips':
-        list_uptime_check_ips(project_name())
+        list_uptime_check_ips()
 
     elif args.command == 'create-uptime-check':
         create_uptime_check_config(project_name(), args.host_name, 
