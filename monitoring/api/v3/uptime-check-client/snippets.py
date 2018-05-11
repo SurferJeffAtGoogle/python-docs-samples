@@ -23,6 +23,14 @@ import google.protobuf.json_format
 import tabulate
 
 
+def list_uptime_check_configs(project_name):
+    client = monitoring_v3.UptimeCheckServiceClient()
+    configs = client.list_uptime_check_configs(project_name)
+    for config in configs:
+        config = monitoring_v3.types.uptime_pb2.UptimeCheckConfig()
+        
+
+
 def list_alert_policies(project_name):
     client = monitoring_v3.AlertPolicyServiceClient()
     policies = client.list_alert_policies(project_name)
@@ -281,6 +289,11 @@ if __name__ == '__main__':
         help=restore.__doc__
     )
 
+    list_uptime_check_configs_parser = subparsers.add_parser(
+        'list-uptime-checks',
+        help=list_alert_policies.__doc__
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-alert-policies':
@@ -305,3 +318,6 @@ if __name__ == '__main__':
 
     elif args.command == 'restore':
         restore(project_name())
+
+    elif args.command == 'list-uptime-checks':
+        list_uptime_check_configs(project_name())
