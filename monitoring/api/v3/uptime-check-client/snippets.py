@@ -15,16 +15,15 @@
 from __future__ import print_function
 
 import argparse
-import json
 import os
-
-from google.cloud import monitoring_v3
-import google.protobuf.json_format
-import tabulate
 import pprint
 
+from google.cloud import monitoring_v3
+import tabulate
 
-def create_uptime_check_config(project_name, host_name=None, display_name=None):
+
+def create_uptime_check_config(project_name, host_name=None,
+                               display_name=None):
     config = monitoring_v3.types.uptime_pb2.UptimeCheckConfig()
     config.display_name = display_name or 'New uptime check'
     config.monitored_resource.type = 'uptime_url'
@@ -44,8 +43,9 @@ def create_uptime_check_config(project_name, host_name=None, display_name=None):
 def list_uptime_check_configs(project_name):
     client = monitoring_v3.UptimeCheckServiceClient()
     configs = client.list_uptime_check_configs(project_name)
+
     for config in configs:
-        pprint.pprint(config)        
+        pprint.pprint(config)
 
 
 def list_uptime_check_ips():
@@ -152,7 +152,7 @@ if __name__ == '__main__':
         list_uptime_check_ips()
 
     elif args.command == 'create-uptime-check':
-        create_uptime_check_config(project_name(), args.host_name, 
+        create_uptime_check_config(project_name(), args.host_name,
                                    args.display_name)
 
     elif args.command == 'get-uptime-check-config':

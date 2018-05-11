@@ -17,8 +17,6 @@ from __future__ import print_function
 import random
 import string
 
-from google.cloud import monitoring_v3
-import google.protobuf.json_format
 import pytest
 
 import snippets
@@ -54,8 +52,10 @@ def uptime():
         yield uptime
 
 
-def test_create_and_delete(capsys, uptime):
-    pass  # create and delete happen in uptime fixture.
+def test_create_and_delete(capsys):
+    # create and delete happen in uptime fixture.
+    with UptimeFixture():
+        pass
 
 
 def test_get_uptime_check_config(capsys, uptime):
