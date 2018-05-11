@@ -38,6 +38,7 @@ def create_uptime_check_config(project_name, host_name=None, display_name=None):
     client = monitoring_v3.UptimeCheckServiceClient()
     new_config = client.create_uptime_check_config(project_name, config)
     pprint.pprint(new_config)
+    return new_config
 
 
 def list_uptime_check_configs(project_name):
@@ -54,6 +55,11 @@ def list_uptime_check_ips(project_name):
         [(ip.region, ip.location, ip.ip_address) for ip in ips],
         ('region', 'location', 'ip_address')
     ))
+
+def get_uptime_check_config(config_name):
+    client = monitoring_v3.UptimeCheckServiceClient()
+    config = client.get_uptime_check_config(config_name)
+    pprint.pprint(config)
 
 
 class MissingProjectIdError(Exception):
@@ -112,6 +118,15 @@ if __name__ == '__main__':
         required=False,
     )
 
+    get_uptime_check_config_parser = subparsers.add_parser(
+        'get-uptime-check-config',
+        help=get_uptime_check_config.__doc__
+    )
+    get_uptime_check_config_parser.add_argument(
+        '-m', '--name',
+        required=True,
+    )
+
     args = parser.parse_args()
 
     if args.command == 'list-uptime-check-configs':
@@ -123,3 +138,6 @@ if __name__ == '__main__':
     elif args.command == 'create-uptime-check':
         create_uptime_check_config(project_name(), args.host_name, 
                                    args.display_name)
+
+    elif args.command == 'get-uptime-check-config':
+        get_uptime_check_config(args.name)
