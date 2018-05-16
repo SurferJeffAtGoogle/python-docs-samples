@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 def run_quickstart():
     # [START monitoring_quickstart]
     from google.cloud import monitoring_v3
 
     client = monitoring_v3.MetricServiceClient()
-    project_name = client.project_path(os.environ['GCLOUD_PROJECT'])
+    project = 'my-project'  # TODO: Update to your project ID.
+    project_name = client.project_path(project)
 
     series = monitoring_v3.types.TimeSeries()
     series.metric.type = 'custom.googleapis.com/my_metric'
