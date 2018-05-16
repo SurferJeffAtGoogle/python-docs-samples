@@ -12,28 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 
 def run_quickstart():
     # [START monitoring_quickstart]
-    from google.cloud import monitoring
+    from google.cloud import monitoring_v3
 
-    client = monitoring.Client()
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(os.environ['GCLOUD_PROJECT'])
 
-    resource = client.resource(
-        type_='gce_instance',
-        labels={
-            'instance_id': '1234567890123456789',
-            'zone': 'us-central1-f',
-        }
-    )
-
-    metric = client.metric(
-        type_='custom.googleapis.com/my_metric',
-        labels={}
-    )
-
-    # Default arguments use endtime datetime.utcnow()
-    client.write_point(metric, resource, 3.14)
+    series = monitoring_v3.types.TimeSeries()
+    series.metric.type = 'custom.googleapis.com/my_metric'
+    series.resource.type = 'gce_instance'
+    series.resource.labels['instance_id'] = '1234567890123456789'
+    series.resource.labels['zone'] = 'us-central1-f'
+    series.points.add().value.double_value = 3.14
     print('Successfully wrote time series.')
     # [END monitoring_quickstart]
 
