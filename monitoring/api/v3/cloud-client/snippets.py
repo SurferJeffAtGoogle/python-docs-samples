@@ -117,10 +117,13 @@ def list_metric_descriptors(project_id):
     # [END monitoring_list_descriptors]
 
 
-def list_monitored_resources():
+def list_monitored_resources(project_id):
     # [START monitoring_list_resources]
-    client = monitoring.Client()
-    for descriptor in client.list_resource_descriptors():
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
+    resource_descriptors = (
+        client.list_monitored_resource_descriptors(project_name))
+    for descriptor in resource_descriptors:
         print(descriptor.type)
     # [END monitoring_list_resources]
 
@@ -252,7 +255,7 @@ if __name__ == '__main__':
     if args.command == 'delete-metric-descriptor':
         delete_metric_descriptor(args.metric_descriptor_name)
     if args.command == 'list-resources':
-        list_monitored_resources()
+        list_monitored_resources(project_id())
     if args.command == 'get-resource':
         get_monitored_resource_descriptor(args.resource_type_name)
     if args.command == 'write-time-series':

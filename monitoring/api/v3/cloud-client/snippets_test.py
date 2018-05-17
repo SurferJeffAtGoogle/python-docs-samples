@@ -43,7 +43,7 @@ def test_list_metric_descriptors(capsys):
 
 
 def test_list_resources(capsys):
-    snippets.list_monitored_resources()
+    snippets.list_monitored_resources(snippets.project_id())
     out, _ = capsys.readouterr()
     assert 'pubsub_topic' in out
 
