@@ -37,7 +37,7 @@ def test_create_get_delete_metric_descriptor(capsys):
 
 
 def test_list_metric_descriptors(capsys):
-    snippets.list_metric_descriptors()
+    snippets.list_metric_descriptors(snippets.project_id())
     out, _ = capsys.readouterr()
     assert 'logging.googleapis.com/byte_count' in out
 

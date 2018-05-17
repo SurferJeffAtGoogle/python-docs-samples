@@ -108,10 +108,11 @@ def list_time_series_reduce():
     # [END monitoring_read_timeseries_reduce]
 
 
-def list_metric_descriptors():
+def list_metric_descriptors(project_id):
     # [START monitoring_list_descriptors]
-    client = monitoring.Client()
-    for descriptor in client.list_metric_descriptors():
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
+    for descriptor in client.list_metric_descriptors(project_name):
         print(descriptor.type)
     # [END monitoring_list_descriptors]
 
@@ -131,10 +132,10 @@ def get_monitored_resource_descriptor(resource_type_name):
     # [END monitoring_get_resource]
 
 
-def get_metric_descriptor(metric_type_name):
+def get_metric_descriptor(metric_name):
     # [START monitoring_get_descriptor]
     client = monitoring_v3.MetricServiceClient()
-    descriptor = client.get_metric_descriptor(metric_type_name)
+    descriptor = client.get_metric_descriptor(metric_name)
     pprint.pprint(descriptor)
     # [END monitoring_get_descriptor]
 
@@ -245,7 +246,7 @@ if __name__ == '__main__':
     if args.command == 'create-metric-descriptor':
         create_metric_descriptor(project_id())
     if args.command == 'list-metric-descriptors':
-        list_metric_descriptors()
+        list_metric_descriptors(project_id())
     if args.command == 'get-metric-descriptor':
         get_metric_descriptor(args.metric_type_name)
     if args.command == 'delete-metric-descriptor':
