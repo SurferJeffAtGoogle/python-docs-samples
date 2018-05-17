@@ -105,8 +105,32 @@ def list_time_series_header(project_id):
     # [END monitoring_read_timeseries_fields]
 
 
-def list_time_series_aggregate():
+def list_time_series_aggregate(project_id):
     # [START monitoring_read_timeseries_align]
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
+    interval = monitoring_v3.types.TimeInterval()
+    now = time.time()
+    interval.end_time.seconds=int(now)
+    interval.end_time.nanos=int(
+        (now - interval.end_time.seconds) * 10**9)
+    interval.start_time.seconds=int(now - 3600)
+    interval.start_time.nanos = interval.end_time.nanos
+    aggregation = monitoring_v3.types.Aggregation()
+    aggregation.alignment_period.seconds = 300  # 5 minutes
+    aggregation.per_series_aligner = (
+        monitoring_v3.enums.Aggregation.Aligner.ALIGN_MEAN)
+
+    results = client.list_time_series(
+        project_name,
+        'metric.type = "compute.googleapis.com/instance/cpu/utilization"',
+        interval, 
+        monitoring_v3.enums.ListTimeSeriesRequest.TimeSeriesView.FULL,
+        )
+    for result in results:
+        print(result)
+    return
+
     client = monitoring.Client()
     metric = 'compute.googleapis.com/instance/cpu/utilization'
     query_results = client.query(metric, hours=1).align(
@@ -289,4 +313,4 @@ if __name__ == '__main__':
     if args.command == 'list-time-series-reduce':
         list_time_series_reduce()
     if args.command == 'list-time-series-aggregate':
-        list_time_series_aggregate()
+        list_time_series_aggregate(project_id())

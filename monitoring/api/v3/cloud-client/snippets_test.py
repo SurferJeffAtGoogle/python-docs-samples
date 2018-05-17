@@ -66,9 +66,12 @@ def test_time_series(capsys):
     out, _ = capsys.readouterr()
     assert 'gce_instance' in out
 
-    snippets.list_time_series_aggregate()
+    snippets.list_time_series_aggregate(snippets.project_id())
     out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
+    assert 'points' in out
+    assert 'interval' in out
+    assert 'start_time' in out
+    assert 'end_time' in out
 
     snippets.list_time_series_reduce()
     out, _ = capsys.readouterr()
