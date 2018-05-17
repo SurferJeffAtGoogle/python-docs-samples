@@ -56,15 +56,15 @@ def test_get_resources(capsys):
 
 
 def test_time_series(capsys):
-    snippets.write_time_series()
+    snippets.write_time_series(snippets.project_id())
 
-    snippets.list_time_series()
+    snippets.list_time_series(snippets.project_id())
     out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
+    assert 'gce_instance' in out
 
-    snippets.list_time_series_header()
+    snippets.list_time_series_header(snippets.project_id())
     out, _ = capsys.readouterr()
-    assert 'TimeSeries with' in out
+    assert 'gce_instance' in out
 
     snippets.list_time_series_aggregate()
     out, _ = capsys.readouterr()

@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 import argparse
 import os
 import pprint
+import time
 
 from google.cloud import monitoring_v3
 
@@ -45,42 +44,63 @@ def delete_metric_descriptor(descriptor_name):
     # [END monitoring_delete_metric]
 
 
-def write_time_series():
+def write_time_series(project_id):
     # [START monitoring_write_timeseries]
-    client = monitoring.Client()
-    resource = client.resource(
-        'gce_instance',
-        labels={
-            'instance_id': '1234567890123456789',
-            'zone': 'us-central1-f',
-        }
-    )
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
 
-    metric = client.metric(
-        type_='custom.googleapis.com/my_metric',
-        labels={
-        }
-    )
-    client.write_point(metric, resource, 3.14)
+    series = monitoring_v3.types.TimeSeries()
+    series.metric.type = 'custom.googleapis.com/my_metric'
+    series.resource.type = 'gce_instance'
+    series.resource.labels['instance_id'] = '1234567890123456789'
+    series.resource.labels['zone'] = 'us-central1-f'
+    point = series.points.add()
+    point.value.double_value = 3.14
+    now = time.time()
+    point.interval.end_time.seconds=int(now)
+    point.interval.end_time.nanos=int(
+        (now - point.interval.end_time.seconds) * 10**9)
+    client.create_time_series(project_name, [series])
     # [END monitoring_write_timeseries]
 
 
-def list_time_series():
+def list_time_series(project_id):
     # [START monitoring_read_timeseries_simple]
-    client = monitoring.Client()
-    metric = 'compute.googleapis.com/instance/cpu/utilization'
-    query_results = client.query(metric, minutes=5)
-    for result in query_results:
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
+    interval = monitoring_v3.types.TimeInterval()
+    now = time.time()
+    interval.end_time.seconds=int(now)
+    interval.end_time.nanos=int(
+        (now - interval.end_time.seconds) * 10**9)
+    interval.start_time.seconds=int(now - 300)
+    interval.start_time.nanos = interval.end_time.nanos
+    results = client.list_time_series(
+        project_name,
+        'metric.type = "compute.googleapis.com/instance/cpu/utilization"',
+        interval, monitoring_v3.enums.ListTimeSeriesRequest.TimeSeriesView.FULL)
+    for result in results:
         print(result)
     # [END monitoring_read_timeseries_simple]
 
 
-def list_time_series_header():
+def list_time_series_header(project_id):
     # [START monitoring_read_timeseries_fields]
-    client = monitoring.Client()
-    metric = 'compute.googleapis.com/instance/cpu/utilization'
-    query_results = client.query(metric, minutes=5).iter(headers_only=True)
-    for result in query_results:
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
+    interval = monitoring_v3.types.TimeInterval()
+    now = time.time()
+    interval.end_time.seconds=int(now)
+    interval.end_time.nanos=int(
+        (now - interval.end_time.seconds) * 10**9)
+    interval.start_time.seconds=int(now - 300)
+    interval.start_time.nanos = interval.end_time.nanos
+    results = client.list_time_series(
+        project_name,
+        'metric.type = "compute.googleapis.com/instance/cpu/utilization"',
+        interval, 
+        monitoring_v3.enums.ListTimeSeriesRequest.TimeSeriesView.HEADERS)
+    for result in results:
         print(result)
     # [END monitoring_read_timeseries_fields]
 
@@ -261,11 +281,11 @@ if __name__ == '__main__':
     if args.command == 'get-resource':
         get_monitored_resource_descriptor(project_id(), args.resource_type_name)
     if args.command == 'write-time-series':
-        write_time_series()
+        write_time_series(project_id())
     if args.command == 'list-time-series':
-        list_time_series()
+        list_time_series(project_id())
     if args.command == 'list-time-series-header':
-        list_time_series_header()
+        list_time_series_header(project_id())
     if args.command == 'list-time-series-reduce':
         list_time_series_reduce()
     if args.command == 'list-time-series-aggregate':
