@@ -128,10 +128,12 @@ def list_monitored_resources(project_id):
     # [END monitoring_list_resources]
 
 
-def get_monitored_resource_descriptor(resource_type_name):
+def get_monitored_resource_descriptor(project_id, resource_type_name):
     # [START monitoring_get_resource]
-    client = monitoring.Client()
-    print(client.fetch_resource_descriptor(resource_type_name))
+    client = monitoring_v3.MetricServiceClient()
+    resource_path = client.monitored_resource_descriptor_path(
+        project_id, resource_type_name)
+    pprint.pprint(client.get_monitored_resource_descriptor(resource_path))
     # [END monitoring_get_resource]
 
 
@@ -257,7 +259,7 @@ if __name__ == '__main__':
     if args.command == 'list-resources':
         list_monitored_resources(project_id())
     if args.command == 'get-resource':
-        get_monitored_resource_descriptor(args.resource_type_name)
+        get_monitored_resource_descriptor(project_id(), args.resource_type_name)
     if args.command == 'write-time-series':
         write_time_series()
     if args.command == 'list-time-series':

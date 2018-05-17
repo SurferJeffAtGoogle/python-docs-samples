@@ -49,7 +49,8 @@ def test_list_resources(capsys):
 
 
 def test_get_resources(capsys):
-    snippets.get_monitored_resource_descriptor('pubsub_topic')
+    snippets.get_monitored_resource_descriptor(
+        snippets.project_id(), 'pubsub_topic')
     out, _ = capsys.readouterr()
     assert 'A topic in Google Cloud Pub/Sub' in out
 
