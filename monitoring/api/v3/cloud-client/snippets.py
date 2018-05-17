@@ -12,30 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+
 import argparse
+import os
+import pprint
 
-from google.cloud import monitoring
+from google.cloud import monitoring_v3
 
 
-def create_metric_descriptor():
+def create_metric_descriptor(project_id):
     # [START monitoring_create_metric]
-    client = monitoring.Client()
-    descriptor = client.metric_descriptor(
-        'custom.googleapis.com/my_metric',
-        metric_kind=monitoring.MetricKind.GAUGE,
-        value_type=monitoring.ValueType.DOUBLE,
-        description='This is a simple example of a custom metric.')
-    descriptor.create()
+    client = monitoring_v3.MetricServiceClient()
+    project_name = client.project_path(project_id)
+    descriptor = monitoring_v3.types.MetricDescriptor()
+    descriptor.type = 'custom.googleapis.com/my_metric'
+    descriptor.metric_kind = (
+        monitoring_v3.enums.MetricDescriptor.MetricKind.GAUGE)
+    descriptor.value_type =  (
+        monitoring_v3.enums.MetricDescriptor.ValueType.DOUBLE)
+    descriptor.description = 'This is a simple example of a custom metric.'
+    descriptor = client.create_metric_descriptor(project_name, descriptor)
+    print('Created {}.'.format(descriptor.name))    
     # [END monitoring_create_metric]
 
 
 def delete_metric_descriptor(descriptor_name):
     # [START monitoring_delete_metric]
-    client = monitoring.Client()
-
-    descriptor = client.metric_descriptor(descriptor_name)
-    descriptor.delete()
-
+    client = monitoring_v3.MetricServiceClient()
+    client.delete_metric_descriptor(descriptor_name)
     print('Deleted metric descriptor {}.'.format(descriptor_name))
     # [END monitoring_delete_metric]
 
@@ -128,9 +133,32 @@ def get_monitored_resource_descriptor(resource_type_name):
 
 def get_metric_descriptor(metric_type_name):
     # [START monitoring_get_descriptor]
-    client = monitoring.Client()
-    print(client.fetch_metric_descriptor(metric_type_name))
+    client = monitoring_v3.MetricServiceClient()
+    descriptor = client.get_metric_descriptor(metric_type_name)
+    pprint.pprint(descriptor)
     # [END monitoring_get_descriptor]
+
+
+class MissingProjectIdError(Exception):
+    pass
+
+
+def project_id():
+    """Retreieves the project id from the environment variable.
+
+    Raises:
+        MissingProjectIdError -- When not set.
+
+    Returns:
+        str -- the project name
+    """
+    project_id = os.environ['GCLOUD_PROJECT']
+
+    if not project_id:
+        raise MissingProjectIdError(
+            'Set the environment variable ' +
+            'GCLOUD_PROJECT to your Google Cloud Project Id.')
+    return project_id
 
 
 if __name__ == '__main__':
@@ -215,7 +243,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'create-metric-descriptor':
-        create_metric_descriptor()
+        create_metric_descriptor(project_id())
     if args.command == 'list-metric-descriptors':
         list_metric_descriptors()
     if args.command == 'get-metric-descriptor':

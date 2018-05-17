@@ -14,20 +14,25 @@
 
 from gcp_devrel.testing import eventually_consistent
 
+import re
 import snippets
 
 
 def test_create_get_delete_metric_descriptor(capsys):
-    snippets.create_metric_descriptor()
-
-    @eventually_consistent.call
-    def __():
-        snippets.get_metric_descriptor('custom.googleapis.com/my_metric')
-
+    snippets.create_metric_descriptor(snippets.project_id())
     out, _ = capsys.readouterr()
-    assert 'DOUBLE' in out
-    snippets.delete_metric_descriptor('custom.googleapis.com/my_metric')
-    out, _ = capsys.readouterr()
+    match = re.search(r'Created (.*)\.', out)
+    metric_name = match.group(1)
+    try:
+        @eventually_consistent.call
+        def __():
+            snippets.get_metric_descriptor(metric_name)
+
+        out, _ = capsys.readouterr()
+        assert 'DOUBLE' in out
+    finally:
+        snippets.delete_metric_descriptor(metric_name)
+        out, _ = capsys.readouterr()
     assert 'Deleted metric' in out
 
 
